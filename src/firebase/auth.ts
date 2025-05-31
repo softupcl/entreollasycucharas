@@ -1,7 +1,19 @@
 import { auth } from './config'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
+} from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { ref, computed } from 'vue'
+
+// Configurar persistencia de sesión
+// Usamos browserLocalPersistence para mantener la sesión entre recargas
+setPersistence(auth, browserLocalPersistence)
 
 export const login = async (email: string, password: string) => {
   try {

@@ -2,7 +2,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePosts, addComment } from '../firebase/posts'
+import { useCategories } from '../firebase/categories'
 import { getAuth } from 'firebase/auth'
+import type { Category } from '@/types'
 
 interface Comment {
   id: number
@@ -26,10 +28,12 @@ interface Post {
 
 const route = useRoute()
 const { getPostById } = usePosts()
+const { getCategories } = useCategories()
 const auth = getAuth()
 const newComment = ref('')
 const comments = ref<Comment[]>([])
 const post = ref<Post | null>(null)
+const categories = ref<Category[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const isSaving = ref(false)
@@ -38,13 +42,28 @@ const canSubmitComment = computed(() => {
   return newComment.value.trim().length > 0 && newComment.value.length <= 500
 })
 
+// Función para obtener el nombre de la categoría
+const getCategoryName = (categoryId: string) => {
+  const category = categories.value.find(c => c.id === categoryId)
+  return category?.name || 'Categoría no encontrada'
+}
+
 // Función para cargar el post
 const loadPost = async () => {
   try {
     loading.value = true
     error.value = null
     const postId = route.params.id as string
-    post.value = await getPostById(postId)
+    
+    // Cargar el post y las categorías
+    const [postData, categoriesData] = await Promise.all([
+      getPostById(postId),
+      getCategories()
+    ])
+
+    post.value = postData
+    categories.value = categoriesData
+    
     if (post.value) {
       comments.value = post.value.comments || []
     } else {
@@ -237,7 +256,7 @@ const formatDate = (date: string) => {
               class="inline-block px-3 py-1 rounded-full mr-4"
               :class="getCategoryColor(post.category) + ' text-white font-semibold text-sm'"
             >
-              {{ post.category }}
+              {{ getCategoryName(post.category) }}
             </div>
             <div class="flex items-center text-gray-600 text-sm">
               <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -21,13 +21,16 @@ onAuthStateChanged(auth, (firebaseUser) => {
 })
 
 // Watch para detectar cambios en el estado de autenticación
-watch(() => auth.currentUser, (newUser) => {
-  if (newUser) {
-    user.value = newUser
-  } else {
-    user.value = null
-  }
-})
+watch(
+  () => auth.currentUser,
+  (newUser) => {
+    if (newUser) {
+      user.value = newUser
+    } else {
+      user.value = null
+    }
+  },
+)
 
 // Evento para manejar la búsqueda
 const handleSearch = (query: string) => {
@@ -62,55 +65,44 @@ const isAuthenticated = computed(() => user.value !== null)
         </div>
 
         <!-- Mobile menu button -->
-        <button 
-          @click="menuOpen = !menuOpen" 
-          class="md:hidden"
-        >
+        <button @click="menuOpen = !menuOpen" class="md:hidden">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path v-if="!menuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              v-if="!menuOpen"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+            <path
+              v-else
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
         <!-- Desktop menu -->
         <div class="hidden md:flex items-center space-x-8">
-          <router-link 
-            to="/" 
-            class="text-lg hover:text-white/80 transition-colors"
-          >
+          <router-link to="/" class="text-lg hover:text-white/80 transition-colors">
             Inicio
           </router-link>
-          <router-link 
-            to="/blog" 
-            class="text-lg hover:text-white/80 transition-colors"
-          >
-            Blog
-          </router-link>
-          <router-link 
-            to="/about" 
-            class="text-lg hover:text-white/80 transition-colors"
-          >
+
+          <router-link to="/about" class="text-lg hover:text-white/80 transition-colors">
             Acerca de
           </router-link>
           <template v-if="isAuthenticated">
-            <router-link 
-              to="/dashboard" 
-              class="text-lg hover:text-white/80 transition-colors"
-            >
+            <router-link to="/dashboard" class="text-lg hover:text-white/80 transition-colors">
               Dashboard
             </router-link>
-            <button 
-              @click="logout" 
-              class="text-lg hover:text-white/80 transition-colors"
-            >
+            <button @click="logout" class="text-lg hover:text-white/80 transition-colors">
               Cerrar Sesión
             </button>
           </template>
           <template v-else>
-            <button 
-              @click="login" 
-              class="text-lg hover:text-white/80 transition-colors"
-            >
+            <button @click="login" class="text-lg hover:text-white/80 transition-colors">
               Iniciar Sesión
             </button>
           </template>
@@ -118,33 +110,27 @@ const isAuthenticated = computed(() => user.value !== null)
       </div>
 
       <!-- Mobile menu -->
-      <div 
+      <div
         v-if="menuOpen"
         class="md:hidden absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 p-4"
       >
-        <router-link 
-          to="/"
-          class="block mb-2 text-lg hover:text-white/80 transition-colors"
-        >
+        <router-link to="/" class="block mb-2 text-lg hover:text-white/80 transition-colors">
           Inicio
         </router-link>
-        <router-link 
-          to="/blog"
-          class="block mb-2 text-lg hover:text-white/80 transition-colors"
-        >
+        <router-link to="/blog" class="block mb-2 text-lg hover:text-white/80 transition-colors">
           Blog
         </router-link>
         <template v-if="isAuthenticated">
-          <button 
-            @click="logout" 
+          <button
+            @click="logout"
             class="block mb-2 w-full text-left text-lg hover:text-white/80 transition-colors"
           >
             Cerrar Sesión
           </button>
         </template>
         <template v-else>
-          <button 
-            @click="login" 
+          <button
+            @click="login"
             class="block mb-2 w-full text-left text-lg hover:text-white/80 transition-colors"
           >
             Iniciar Sesión

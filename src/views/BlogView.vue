@@ -2,14 +2,19 @@
 import BlogPost from '@/components/BlogPost.vue'
 import CategoryFilter from '@/components/CategoryFilter.vue'
 import { ref, computed, onMounted } from 'vue'
-import { getPosts } from '@/firebase/posts'
+import { usePosts } from '@/firebase/posts'
+import { useCategories } from '@/firebase/categories'
+import type { Category } from '@/types'
 
 // Estado para almacenar la categoría seleccionada
 const selectedCategory = ref<string | null>(null)
 // Estado para la búsqueda
 const searchQuery = ref('')
 // Estado para los posts
+const { getPosts } = usePosts()
+const { getCategories } = useCategories()
 const posts = ref<Post[]>([])
+const categories = ref<Category[]>([])
 // Estado de carga
 const loading = ref(true)
 
@@ -26,13 +31,22 @@ interface Post {
   excerpt?: string
 }
 
-// Función para obtener posts de Firebase
+// Función para obtener el nombre de la categoría
+const getCategoryName = (categoryId: string) => {
+  const category = categories.value.find(c => c.id === categoryId)
+  return category?.name || 'Categoría no encontrada'
+}
+
+// Función para obtener posts y categorías de Firebase
 const fetchPosts = async () => {
   try {
+    loading.value = true
     const postsData = await getPosts()
+    const categoriesData = await getCategories()
     posts.value = postsData
+    categories.value = categoriesData
   } catch (error) {
-    console.error('Error al obtener posts:', error)
+    console.error('Error al obtener datos:', error)
   } finally {
     loading.value = false
   }
@@ -111,7 +125,7 @@ const handleCategoryChange = (category: string | null) => {
         createdAt: post.createdAt,
         imageUrl: post.imageUrl || '',
         author: post.author,
-        category: post.category,
+        category: getCategoryName(post.category),
         content: post.content,
         updatedAt: post.updatedAt
       }" />
