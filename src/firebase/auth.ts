@@ -1,5 +1,7 @@
 import { auth } from './config'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
+import type { User } from 'firebase/auth'
+import { ref, computed } from 'vue'
 
 export const login = async (email: string, password: string) => {
   try {
@@ -27,11 +29,21 @@ export const logout = async () => {
   }
 }
 
+// Estado de autenticación
+const currentUser = ref<User | null>(null)
+
+// Observar cambios en el estado de autenticación
+onAuthStateChanged(auth, (user) => {
+  currentUser.value = user
+})
+
 // Exportar el estado de autenticación
 export const useAuth = () => {
   return {
+    user: currentUser,
     login,
     register,
-    logout
+    logout,
+    isAuthenticated: computed(() => !!currentUser.value)
   }
 }

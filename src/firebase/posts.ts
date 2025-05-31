@@ -21,7 +21,7 @@ interface Post {
   createdAt: string
   updatedAt: string
   category: string
-  image?: string
+  imageUrl?: string
   excerpt?: string
   comments: Comment[]
 }
@@ -92,6 +92,29 @@ export const deletePost = async (id: string) => {
   try {
     const docRef = doc(postsCollection, id)
     await deleteDoc(docRef)
+  } catch (error) {
+    throw error
+  }
+}
+
+export const addComment = async (postId: string, comment: Comment) => {
+  try {
+    const postRef = doc(postsCollection, postId)
+    const postSnap = await getDoc(postRef)
+    
+    if (!postSnap.exists()) {
+      throw new Error('Post no encontrado')
+    }
+
+    const post = postSnap.data()
+    const newComments = [...(post.comments || []), comment]
+    
+    await updateDoc(postRef, {
+      comments: newComments,
+      updatedAt: new Date().toISOString()
+    })
+    
+    return newComments
   } catch (error) {
     throw error
   }

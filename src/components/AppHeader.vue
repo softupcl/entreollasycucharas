@@ -93,6 +93,12 @@ const isAuthenticated = computed(() => user.value !== null)
             Acerca de
           </router-link>
           <template v-if="isAuthenticated">
+            <router-link 
+              to="/dashboard" 
+              class="text-lg hover:text-white/80 transition-colors"
+            >
+              Dashboard
+            </router-link>
             <button 
               @click="logout" 
               class="text-lg hover:text-white/80 transition-colors"

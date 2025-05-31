@@ -6,6 +6,7 @@ import LoginView from '../components/Login.vue'
 import RegisterView from '../components/Register.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AboutView from '../views/AboutView.vue'
+import CreatePostView from '../components/CreatePost.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import { auth } from '../firebase/config'
 
@@ -49,6 +50,12 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/create-post',
+      name: 'create-post',
+      component: CreatePostView,
       meta: { requiresAuth: true }
     },
     {
