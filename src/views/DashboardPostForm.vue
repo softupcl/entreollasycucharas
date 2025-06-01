@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePosts } from '../firebase/posts'
 import { useCategories } from '../firebase/categories'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import Editor from '@tinymce/tinymce-vue'
 
 interface Category {
   id: string
@@ -46,7 +47,7 @@ const formData = ref<FormData>({
   excerpt: '',
   imageFile: undefined,
   author: 'admin', // You might want to get this from user auth
-  comments: [] as Comment[]
+  comments: [] as Comment[],
 })
 
 const categories = ref<Category[]>([])
@@ -71,7 +72,7 @@ const loadPost = async () => {
         excerpt: post.excerpt || '',
         imageFile: undefined,
         comments: post.comments || [],
-        author: post.author || 'admin'
+        author: post.author || 'admin',
       }
     }
   } catch (err) {
@@ -128,7 +129,7 @@ const handleSubmit = async () => {
         category: formData.value.category,
         imageUrl: formData.value.imageUrl,
         excerpt: formData.value.excerpt,
-        comments: formData.value.comments
+        comments: formData.value.comments,
       })
     } else {
       await createPost({
@@ -138,7 +139,7 @@ const handleSubmit = async () => {
         imageUrl: formData.value.imageUrl,
         excerpt: formData.value.excerpt,
         author: formData.value.author,
-        comments: formData.value.comments
+        comments: formData.value.comments,
       })
     }
     router.push({ name: 'dashboard-posts' })
@@ -163,51 +164,91 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">
-          {{ isEditing ? 'Editar Post' : 'Nuevo Post' }}
-        </h1>
-        <router-link
-          :to="{ name: 'dashboard-posts' }"
-          class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-        >
-          Volver
-        </router-link>
-      </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white shadow rounded-lg p-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">
+        {{ route.params.id ? 'Editar Post' : 'Crear Post' }}
+      </h1>
 
       <!-- Loading state -->
-      <!-- <div v-if="loading" class="flex items-center justify-center min-h-[400px]">
+      <div v-if="loading" class="flex items-center justify-center min-h-[400px]">
         <div class="text-center">
-          <svg class="animate-spin h-12 w-12 text-gray-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            class="animate-spin h-12 w-12 text-gray-600 mx-auto"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
           <p class="mt-2 text-gray-600">Cargando...</p>
         </div>
-      </div> -->
+      </div>
 
       <!-- Error state -->
-      <!-- <div v-else-if="error" class="flex items-center justify-center min-h-[400px]">
+      <div v-else-if="error" class="flex items-center justify-center min-h-[400px]">
         <div class="text-center">
-          <svg class="w-12 h-12 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          <svg
+            class="w-12 h-12 text-red-500 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
           </svg>
           <p class="mt-2 text-red-600">{{ error }}</p>
         </div>
-      </div> -->
+      </div>
 
       <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+      <form v-else @submit.prevent="handleSubmit" class="space-y-6">
         <div>
           <label for="title" class="block text-sm font-medium text-gray-700">Título</label>
           <input
             type="text"
             id="title"
             v-model="formData.title"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label for="content" class="block text-sm font-medium text-gray-700">Contenido</label>
+          <Editor
+            api-key="90mtwpzyyx7qzjjcajz6v4az72cnsln0p1p59oj3mzo0jflz"
+            id="content"
+            v-model="formData.content"
+            :init="{
+              height: 500,
+              menubar: true,
+              plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime media table paste code help wordcount',
+              ],
+              toolbar:
+                'undo redo | formatselect | bold italic backcolor | \
+                alignleft aligncenter alignright alignjustify | \
+                bullist numlist outdent indent | removeformat | help',
+            }"
           />
         </div>
 
@@ -218,18 +259,6 @@ onMounted(async () => {
             v-model="formData.excerpt"
             rows="3"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            placeholder="Escribe un resumen del post..."
-          ></textarea>
-        </div>
-
-        <div>
-          <label for="content" class="block text-sm font-medium text-gray-700">Contenido</label>
-          <textarea
-            id="content"
-            v-model="formData.content"
-            rows="10"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
           ></textarea>
         </div>
 
@@ -238,10 +267,9 @@ onMounted(async () => {
           <select
             id="category"
             v-model="formData.category"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
-            <option value="">Selecciona una categoría</option>
             <option v-for="category in categories" :key="category.id" :value="category.id">
               {{ category.name }}
             </option>
@@ -249,11 +277,11 @@ onMounted(async () => {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Imagen</label>
+          <label for="image" class="block text-sm font-medium text-gray-700">Imagen</label>
           <div
-            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
+            class="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6"
           >
-            <div class="space-y-1 text-center">
+            <div class="text-center">
               <svg
                 class="mx-auto h-12 w-12 text-gray-400"
                 stroke="currentColor"
@@ -268,44 +296,52 @@ onMounted(async () => {
                   stroke-linejoin="round"
                 />
               </svg>
-              <div class="flex text-sm text-gray-600">
+              <div class="mt-1 flex text-sm text-gray-600">
                 <label
-                  for="file-upload"
+                  for="image"
                   class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
                 >
                   <span>Subir una imagen</span>
                   <input
-                    id="file-upload"
-                    name="file-upload"
+                    id="image"
+                    name="image"
                     type="file"
+                    class="sr-only"
                     accept="image/*"
                     @change="handleImageUpload"
-                    class="sr-only"
                   />
                 </label>
-                <p class="pl-1">o arrastra aquí</p>
+                <p class="pl-1">o arrastra y suelta</p>
               </div>
-              <p class="text-xs text-gray-500">PNG, JPG, GIF hasta 10MB</p>
+              <p class="text-xs text-gray-500">PNG, JPG, GIF hasta 5MB</p>
             </div>
           </div>
           <div v-if="formData.imageUrl" class="mt-4">
-            <img
-              :src="formData.imageUrl"
-              alt="Preview"
-              class="rounded-lg shadow-lg max-h-64 w-full object-cover"
-            />
+            <img :src="formData.imageUrl" class="w-full h-48 object-cover rounded-lg" />
           </div>
         </div>
 
-        <div class="flex justify-end">
+        <div>
+          <label for="author" class="block text-sm font-medium text-gray-700">Autor</label>
+          <input
+            type="text"
+            id="author"
+            v-model="formData.author"
+            required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div>
           <button
             type="submit"
             :disabled="loading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            :class="{ 'opacity-50 cursor-not-allowed': loading }"
           >
             <svg
               v-if="loading"
-              class="animate-spin h-5 w-5 mr-3 inline"
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -324,7 +360,7 @@ onMounted(async () => {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            {{ loading ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear' }}
+            {{ loading ? 'Guardando...' : route.params.id ? 'Actualizar' : 'Crear' }}
           </button>
         </div>
       </form>
