@@ -11,12 +11,13 @@ export interface Post {
   title: string
   content: string
   category: string
+  categoryName: string
   author: string
   createdAt: string
   updatedAt: string
   excerpt?: string
   imageUrl?: string
-  comments?: Comment[]
+  comments: Comment[]
 }
 
 export interface Comment {

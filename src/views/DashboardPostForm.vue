@@ -29,6 +29,7 @@ interface FormData {
   title: string
   content: string
   category: string
+  categoryName: string
   imageUrl?: string
   excerpt?: string
   imageFile?: File
@@ -40,6 +41,7 @@ const formData = ref<FormData>({
   title: '',
   content: '',
   category: '',
+  categoryName: '',
   imageUrl: '',
   excerpt: '',
   imageFile: undefined,
@@ -64,9 +66,12 @@ const loadPost = async () => {
         title: post.title,
         content: post.content,
         category: post.category,
+        categoryName: post.categoryName || '',
         imageUrl: post.imageUrl || '',
         excerpt: post.excerpt || '',
         imageFile: undefined,
+        comments: post.comments || [],
+        author: post.author || 'admin'
       }
     }
   } catch (err) {

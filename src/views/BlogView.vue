@@ -1,54 +1,91 @@
 <script setup lang="ts">
 import BlogPost from '@/components/BlogPost.vue'
-import CategoryFilter from '@/components/CategoryFilter.vue'
-import { ref, computed, onMounted } from 'vue'
+import HeroSlider from '@/components/HeroSlider.vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { db } from '@/firebase/config'
+import { collection, getDocs } from 'firebase/firestore'
 import { usePosts } from '@/firebase/posts'
-import { useCategories } from '@/firebase/categories'
-import type { Category } from '@/types'
+import type { Post, Category } from '@/types'
 
-// Estado para almacenar la categoría seleccionada
-const selectedCategory = ref<string | null>(null)
-// Estado para la búsqueda
-const searchQuery = ref('')
-// Estado para los posts
-const { getPosts } = usePosts()
-const { getCategories } = useCategories()
+// Estado para los posts y categorías
 const posts = ref<Post[]>([])
-const categories = ref<Category[]>([])
-// Estado de carga
 const loading = ref(true)
+const selectedCategory = ref<string | null>(null)
+const searchQuery = ref('')
 
-// Definición del tipo Post
-interface Post {
-  id: string
-  title: string
-  content: string
-  author: string
-  createdAt: string
-  updatedAt: string
-  category: string
-  imageUrl?: string
-  excerpt?: string
+// Función para manejar el cambio de categoría
+const handleCategoryChange = (category: string | null) => {
+  selectedCategory.value = category
 }
 
-// Función para obtener el nombre de la categoría
-const getCategoryName = (categoryId: string) => {
-  const category = categories.value.find(c => c.id === categoryId)
-  return category?.name || 'Categoría no encontrada'
+// Función para verificar si una categoría está seleccionada
+const isCategorySelected = (categoryId: string | null) => {
+  return selectedCategory.value === categoryId
 }
 
-// Función para obtener posts y categorías de Firebase
+// Estado para las categorías
+const categories = ref<Category[]>([])
+
+// Función para obtener categorías
+const fetchCategories = async () => {
+  try {
+    // Obtener todas las categorías únicas de los posts
+    const allCategories = posts.value.map((post) => post.category)
+    const categoryIds = [...new Set(allCategories)]
+
+    // Obtener las categorías del Firestore
+    const categoriesCollection = collection(db, 'categories')
+    const categoriesSnapshot = await getDocs(categoriesCollection)
+
+    // Crear un mapa de categorías
+    const categoriesMap = categoriesSnapshot.docs.reduce(
+      (acc, doc) => {
+        acc[doc.id] = {
+          id: doc.id,
+          name: doc.data().name as string,
+          color: doc.data().color as string,
+        }
+        return acc
+      },
+      {} as Record<string, { id: string; name: string; color: string }>,
+    )
+
+    // Actualizar las categorías
+    categories.value = categoryIds
+      .map((id) => categoriesMap[id] || { id, name: id, color: 'bg-gray-100' })
+      .sort((a, b) => a.name.localeCompare(b.name))
+  } catch (error) {
+    console.error('Error al obtener categorías:', error)
+  }
+}
+
+// Obtener categorías al cargar los posts
+watch(
+  posts,
+  () => {
+    if (posts.value.length > 0) {
+      fetchCategories()
+    }
+  },
+  { immediate: true },
+)
+
+// Función para obtener posts de Firebase
 const fetchPosts = async () => {
   try {
     loading.value = true
-    const postsData = await getPosts()
-    const categoriesData = await getCategories()
-    posts.value = postsData
-    categories.value = categoriesData
+    console.log('Obteniendo posts...')
+    const fetchedPosts = await usePosts().getPosts()
+    console.log('Posts obtenidos:', fetchedPosts)
+    posts.value = fetchedPosts
+    console.log('Posts en ref:', posts.value)
+    console.log('Tipo de posts:', typeof posts.value)
+    console.log('Número de posts:', posts.value.length)
   } catch (error) {
-    console.error('Error al obtener datos:', error)
+    console.error('Error al obtener posts:', error)
   } finally {
     loading.value = false
+    console.log('Estado de carga:', loading.value)
   }
 }
 
@@ -69,46 +106,64 @@ const filterBySearch = (post: Post) => {
 
 // Posts filtrados según la categoría y búsqueda
 const filteredPosts = computed(() => {
+  console.log('Calculando filteredPosts...')
+  console.log('Posts originales:', posts.value)
+  console.log('Categoría seleccionada:', selectedCategory.value)
+  console.log('Búsqueda:', searchQuery.value)
+
   let filtered = posts.value
-  
+
   // Filtrar por categoría si hay una seleccionada
   if (selectedCategory.value) {
-    filtered = filtered.filter(post => post.category === selectedCategory.value)
+    filtered = filtered.filter((post) => post.category === selectedCategory.value)
+    console.log('Posts después de filtrar por categoría:', filtered)
   }
-  
+
   // Filtrar por búsqueda si hay texto de búsqueda
   if (searchQuery.value) {
     filtered = filtered.filter(filterBySearch)
+    console.log('Posts después de filtrar por búsqueda:', filtered)
   }
-  
+
+  console.log('Posts filtrados finales:', filtered)
   return filtered
 })
-
-// Función para manejar el cambio de categoría
-const handleCategoryChange = (category: string | null) => {
-  selectedCategory.value = category
-}
-
-
 </script>
 
 <template>
   <div class="container mx-auto px-6 py-12">
-    <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-12 mb-12 text-white relative overflow-hidden">
-      <div class="absolute inset-0 bg-black bg-opacity-30"></div>
-      <div class="relative">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">Bienvenido a nuestro blog</h1>
-        <p class="text-xl mb-8">Descubre los últimos artículos sobre tecnología, desarrollo y diseño web</p>
-        <button class="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all">
-          Explorar ahora
+    <!-- Hero Slider -->
+    <HeroSlider />
+
+    <!-- Lista de categorías -->
+    <div class="mb-8">
+      <div class="flex flex-wrap gap-2">
+        <button
+          class="px-8 py-2 rounded-full text-sm font-medium transition-colors"
+          @click="handleCategoryChange(null)"
+          :class="[
+            !selectedCategory ? 'text-white' : 'text-gray-200',
+            'bg-black',
+            !selectedCategory ? 'hover:opacity-500' : 'hover:bg-gray-500',
+          ]"
+        >
+          Todas las categorias
+        </button>
+
+        <button
+          v-for="category in categories"
+          :key="category.id"
+          class="px-4 py-2 rounded-full text-sm font-medium transition-colors"
+          @click="handleCategoryChange(category.id)"
+          :class="[
+            isCategorySelected(category.id) ? 'text-white' : 'text-gray-800',
+            category.color || 'bg-gray-100',
+            isCategorySelected(category.id) ? 'hover:opacity-90' : 'hover:bg-gray-200',
+          ]"
+        >
+          {{ category.name }}
         </button>
       </div>
-    </div>
-
-    <!-- Filtros por categoría -->
-    <div class="mb-8">
-      <CategoryFilter @update-category="handleCategoryChange" />
     </div>
 
     <!-- Estado de carga -->
@@ -116,19 +171,29 @@ const handleCategoryChange = (category: string | null) => {
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
     </div>
 
+    <!-- Error message -->
+    <div v-else-if="!posts.length" class="text-center text-red-500">
+      No se pudieron cargar los posts
+    </div>
+
     <!-- Posts -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <BlogPost v-for="post in filteredPosts" :key="post.id" :post="{
-        id: post.id,
-        title: post.title,
-        excerpt: post.excerpt || '',
-        createdAt: post.createdAt,
-        imageUrl: post.imageUrl || '',
-        author: post.author,
-        category: getCategoryName(post.category),
-        content: post.content,
-        updatedAt: post.updatedAt
-      }" />
+      <BlogPost
+        v-for="post in filteredPosts"
+        :key="post.id"
+        :post="{
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt || 'Sin resumen disponible',
+          createdAt: post.createdAt,
+          imageUrl: post.imageUrl || '/default-image.jpg',
+          author: post.author,
+          category: post.category,
+          categoryName: post.categoryName,
+          content: post.content,
+          updatedAt: post.updatedAt,
+        }"
+      />
     </div>
   </div>
 </template>

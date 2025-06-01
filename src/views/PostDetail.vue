@@ -44,7 +44,7 @@ const canSubmitComment = computed(() => {
 
 // Función para obtener el nombre de la categoría
 const getCategoryName = (categoryId: string) => {
-  const category = categories.value.find(c => c.id === categoryId)
+  const category = categories.value.find((c) => c.id === categoryId)
   return category?.name || 'Categoría no encontrada'
 }
 
@@ -54,16 +54,13 @@ const loadPost = async () => {
     loading.value = true
     error.value = null
     const postId = route.params.id as string
-    
+
     // Cargar el post y las categorías
-    const [postData, categoriesData] = await Promise.all([
-      getPostById(postId),
-      getCategories()
-    ])
+    const [postData, categoriesData] = await Promise.all([getPostById(postId), getCategories()])
 
     post.value = postData
     categories.value = categoriesData
-    
+
     if (post.value) {
       comments.value = post.value.comments || []
     } else {
@@ -233,7 +230,7 @@ const formatDate = (date: string) => {
       <!-- Header con botón de regreso -->
       <div class="flex items-center mb-8">
         <router-link
-          to="/blog"
+          to="/"
           class="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -369,11 +366,25 @@ const formatDate = (date: string) => {
       <div v-if="post">
         <div class="mt-8">
           <div v-if="comments && comments.length > 0">
-            <div v-for="comment in comments" :key="comment.id" class="bg-white rounded-lg shadow-md p-6 mb-4">
+            <div
+              v-for="comment in comments"
+              :key="comment.id"
+              class="bg-white rounded-lg shadow-md p-6 mb-4"
+            >
               <div class="flex items-start">
                 <div class="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 mr-4">
-                  <svg class="w-8 h-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    class="w-8 h-8 mx-auto text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
                 <div class="flex-1">
@@ -388,8 +399,18 @@ const formatDate = (date: string) => {
           </div>
           <div v-else class="text-center py-6 text-gray-500">
             <div class="flex flex-col items-center">
-              <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              <svg
+                class="w-12 h-12 text-gray-400 mb-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                />
               </svg>
               <p class="text-sm">No hay comentarios aún</p>
             </div>

@@ -21,6 +21,7 @@ interface Post {
   createdAt: string
   updatedAt: string
   category: string
+  categoryName: string
   imageUrl?: string
   excerpt?: string
   comments: Comment[]
@@ -50,10 +51,23 @@ export const getPosts = async (): Promise<Post[]> => {
   try {
     const q = query(postsCollection, orderBy('createdAt', 'desc'))
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(doc => ({
+    const posts = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     } as Post))
+
+    // Obtener categorías
+    const categoriesCollection = collection(db, 'categories')
+    const categoriesSnapshot = await getDocs(categoriesCollection)
+    const categoriesMap = new Map(
+      categoriesSnapshot.docs.map(doc => [doc.id, doc.data().name as string])
+    )
+
+    // Actualizar posts con nombres de categorías
+    return posts.map(post => ({
+      ...post,
+      categoryName: categoriesMap.get(post.category) || post.category
+    }))
   } catch (error) {
     throw error
   }

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-type Category = string
-
 interface BlogPost {
   id: string
   title: string
@@ -8,36 +6,25 @@ interface BlogPost {
   createdAt: string
   imageUrl: string
   author: string
-  category: Category
+  category: string
+  categoryName: string
   content: string
   updatedAt: string
+  featured?: boolean
 }
 
 const props = defineProps<{
   post: BlogPost
 }>()
-
-// Mapeo de categorías a colores
-const categoryColors = {
-  Tecnología: 'bg-blue-500',
-  Desarrollo: 'bg-purple-500',
-  Diseño: 'bg-pink-500',
-  Programación: 'bg-green-500',
-  'UI/UX': 'bg-yellow-500',
-  default: 'bg-gray-500'
-}
-
-// Función para obtener el color de la categoría
-const getCategoryColor = (category: string) => {
-  return categoryColors[category as keyof typeof categoryColors] || categoryColors.default
-}
 </script>
 
 <template>
-  <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-    <!-- Enlace a la página de detalle -->
+  <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
     <router-link :to="`/blog/${post.id}`" class="block">
-      <div class="h-48 bg-gray-200 relative">
+      <div :class="{
+        'h-48': !post.featured,
+        'h-64 lg:h-96': post.featured
+      }" class="bg-gray-200 relative">
         <div v-if="post.imageUrl" class="w-full h-full">
           <img :src="post.imageUrl || ''" 
                :alt="post.title" 
@@ -60,32 +47,40 @@ const getCategoryColor = (category: string) => {
           </svg>
         </div>
       </div>
-      <div class="p-6">
-        <!-- Categoría -->
-        <div
-          class="inline-block px-3 py-1 rounded-full mb-4"
-          :class="getCategoryColor(post.category) + ' text-white font-semibold text-sm'"
-        >
-          {{ post.category }}
+      <div class="p-6" :class="{
+        'lg:p-8': post.featured
+      }">
+        <div class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full inline-block mb-2">
+          {{ post.categoryName }}
         </div>
 
-        <h3 class="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
+        <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-3 hover:text-blue-600 transition-colors" :class="{
+          'lg:text-3xl': post.featured
+        }">
           {{ post.title }}
         </h3>
 
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-gray-600 text-sm">{{ post.createdAt }}</p>
-          <div class="flex items-center text-sm text-gray-600">
-            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        <p class="text-gray-600 mb-4 line-clamp-3" :class="{
+          'lg:text-lg': post.featured
+        }">
+          {{ post.excerpt }}
+        </p>
+
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <span>
+            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
             {{ post.author }}
-          </div>
+          </span>
+          <span>
+            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ new Date(post.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+          </span>
         </div>
-
-        <p class="text-gray-700 line-clamp-2">{{ post.excerpt }}</p>
       </div>
     </router-link>
-  </article>
+  </div>
 </template>
