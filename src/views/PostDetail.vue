@@ -144,20 +144,10 @@ const handleAddComment = async () => {
   }
 }
 
-// Mapeo de categorías a colores
-type Category = 'Tecnología' | 'Desarrollo' | 'Diseño' | 'Programación' | 'UI/UX'
-
-const categoryColors: Record<Category, string> = {
-  Tecnología: 'bg-blue-500',
-  Desarrollo: 'bg-purple-500',
-  Diseño: 'bg-pink-500',
-  Programación: 'bg-green-500',
-  'UI/UX': 'bg-yellow-500',
-}
-
-// Función para obtener el color de una categoría
-const getCategoryColor = (category: string): string => {
-  return categoryColors[category as Category] || 'bg-gray-500'
+// Función para obtener el color de una categoría desde las categorías de Firebase
+const getCategoryColor = (categoryId: string): string => {
+  const category = categories.value.find((c) => c.id === categoryId)
+  return category?.color || 'bg-gray-500'
 }
 
 // Formatear fecha
@@ -234,19 +224,14 @@ const formatDate = (date: string) => {
           class="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Volver al blog
+          Volver
         </router-link>
       </div>
 
+      <!-- Información del post -->
       <article class="bg-white rounded-lg shadow-md overflow-hidden">
-        <!-- Información del post -->
         <div class="p-6">
           <div class="flex items-center mb-4">
             <div

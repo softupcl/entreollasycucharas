@@ -14,18 +14,18 @@ interface HeroSlide {
 
 const slides = ref<HeroSlide[]>([
   {
-    title: 'Tecnología del Futuro',
-    description: 'Descubre las últimas tendencias en tecnología y desarrollo',
+    title: 'Comida Chilena',
+    description: 'Descubre recetas de la cocina chilena',
     image: new URL('@/assets/images/hero/comida.jpg', import.meta.url).href,
   },
   {
-    title: 'Desarrollo Web Moderno',
-    description: 'Aprende las mejores prácticas y herramientas para desarrollo web',
+    title: 'Postres',
+    description: 'Las mejores recetas de postres para disfrutar',
     image: new URL('@/assets/images/hero/postres.jpg', import.meta.url).href,
   },
   {
-    title: 'Diseño y UX',
-    description: 'Crea experiencias de usuario únicas y memorables',
+    title: 'Tortas y pasteles',
+    description: 'Compartimos las mejores recetas de tortas y pasteles para disfrutar',
     image: new URL('@/assets/images/hero/tortas.jpg', import.meta.url).href,
   },
 ])
@@ -48,9 +48,10 @@ const modules = [Navigation, Pagination, Autoplay]
       class="w-full h-full"
     >
       <swiper-slide v-for="(slide, index) in slides" :key="index">
-        <div class="relative h-full">
+        <div class="relative w-full">
           <img :src="slide.image" class="w-full h-full object-cover" :alt="slide.title" />
-          <!-- <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div> -->
+          <div class="absolute inset-0 bg-transparent bg-opacity-95 backdrop-blur-sm"></div>
+
           <div class="absolute inset-0 flex items-center justify-center">
             <div class="text-white text-center px-4">
               <h1 class="text-5xl md:text-7xl font-bold mb-6">

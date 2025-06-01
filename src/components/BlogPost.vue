@@ -11,6 +11,7 @@ interface BlogPost {
   content: string
   updatedAt: string
   featured?: boolean
+  categoryColor?: string
 }
 
 const props = defineProps<{
@@ -50,8 +51,14 @@ const props = defineProps<{
       <div class="p-6" :class="{
         'lg:p-8': post.featured
       }">
-        <div class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full inline-block mb-2">
-          {{ post.categoryName }}
+        <div class="inline-flex items-center gap-2 mb-2">
+          <span class="inline-block px-3 py-1 rounded-full text-sm font-medium"
+                :class="[
+                  post.categoryColor || 'bg-gray-100',
+                  'text-white'
+                ]">
+            {{ post.categoryName }}
+          </span>
         </div>
 
         <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-3 hover:text-blue-600 transition-colors" :class="{

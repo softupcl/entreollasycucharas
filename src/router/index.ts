@@ -11,7 +11,9 @@ import DashboardPostsView from '../views/DashboardPostsView.vue'
 import DashboardPostForm from '../views/DashboardPostForm.vue'
 import DashboardCategoriesView from '../views/DashboardCategoriesView.vue'
 import DashboardCategoryForm from '../views/DashboardCategoryForm.vue'
+import DashboardUsersView from '../views/DashboardUsersView.vue'
 import { auth } from '../firebase/config'
+import { useAuth } from '../composables/useAuth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,6 +83,11 @@ const router = createRouter({
           name: 'dashboard-categories-edit',
           component: DashboardCategoryForm,
           props: true
+        },
+        {
+          path: 'users',
+          name: 'dashboard-users',
+          component: DashboardUsersView
         }
       ]
     },
@@ -99,29 +106,49 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const { user, isAdmin, isEditor, loading } = useAuth()
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const isAuthRoute = to.path.startsWith('/auth')
 
-  // Esperar a que Firebase termine de restaurar la sesión
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  // Esperar a que se carguen los roles del usuario
+  if (loading.value) {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  }
 
+  // Verificar autenticación para rutas que requieren login
   if (requiresAuth) {
     try {
-      const user = auth.currentUser
-      if (!user) {
+      const currentUser = auth.currentUser
+      if (!currentUser) {
         next('/auth/login')
         return
       }
+
+      // Verificar permisos según la ruta
+      if (to.path.startsWith('/dashboard')) {
+        if (!isAdmin.value) {
+          alert('Solo los administradores pueden acceder al panel de control')
+          next('/')
+          return
+        }
+      }
+
+      // Aquí podrías agregar más verificaciones de roles según necesites
+      // Por ejemplo, para rutas que requieren ser editor
+      if (to.path.startsWith('/editor')) {
+        if (!isEditor.value) {
+          alert('Solo los editores pueden acceder a esta sección')
+          next('/')
+          return
+        }
+      }
+
     } catch (error) {
-      console.error('Error al verificar autenticación:', error)
+      console.error('Error en la autenticación:', error)
       next('/auth/login')
       return
     }
-  } else if (isAuthRoute && auth.currentUser) {
-    // Si el usuario está autenticado y trata de acceder a /auth/*, redirigir a home
-    next('/')
-    return
   }
+
   next()
 })
 

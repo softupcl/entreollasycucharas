@@ -12,10 +12,13 @@ const posts = ref<Post[]>([])
 const loading = ref(true)
 const selectedCategory = ref<string | null>(null)
 const searchQuery = ref('')
+const currentPage = ref(1)
+const postsPerPage = ref(12)
 
 // Función para manejar el cambio de categoría
 const handleCategoryChange = (category: string | null) => {
   selectedCategory.value = category
+  currentPage.value = 1
 }
 
 // Función para verificar si una categoría está seleccionada
@@ -106,28 +109,51 @@ const filterBySearch = (post: Post) => {
 
 // Posts filtrados según la categoría y búsqueda
 const filteredPosts = computed(() => {
-  console.log('Calculando filteredPosts...')
-  console.log('Posts originales:', posts.value)
-  console.log('Categoría seleccionada:', selectedCategory.value)
-  console.log('Búsqueda:', searchQuery.value)
-
   let filtered = posts.value
 
   // Filtrar por categoría si hay una seleccionada
   if (selectedCategory.value) {
     filtered = filtered.filter((post) => post.category === selectedCategory.value)
-    console.log('Posts después de filtrar por categoría:', filtered)
   }
 
   // Filtrar por búsqueda si hay texto de búsqueda
   if (searchQuery.value) {
     filtered = filtered.filter(filterBySearch)
-    console.log('Posts después de filtrar por búsqueda:', filtered)
   }
 
-  console.log('Posts filtrados finales:', filtered)
   return filtered
 })
+
+// Posts paginados
+const paginatedPosts = computed(() => {
+  const start = (currentPage.value - 1) * postsPerPage.value
+  const end = start + postsPerPage.value
+  return filteredPosts.value.slice(start, end)
+})
+
+// Número total de páginas
+const totalPages = computed(() => {
+  return Math.ceil(filteredPosts.value.length / postsPerPage.value)
+})
+
+// Función para cambiar página
+const changePage = (page: number) => {
+  currentPage.value = page
+}
+
+// Función para ir a la página anterior
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+// Función para ir a la página siguiente
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
 </script>
 
 <template>
@@ -179,7 +205,7 @@ const filteredPosts = computed(() => {
     <!-- Posts -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <BlogPost
-        v-for="post in filteredPosts"
+        v-for="post in paginatedPosts"
         :key="post.id"
         :post="{
           id: post.id,
@@ -192,8 +218,40 @@ const filteredPosts = computed(() => {
           categoryName: post.categoryName,
           content: post.content,
           updatedAt: post.updatedAt,
+          categoryColor: categories.find(c => c.id === post.category)?.color || 'bg-gray-100'
         }"
       />
+    </div>
+
+    <!-- Paginación -->
+    <div v-if="totalPages > 1" class="flex justify-center items-center mt-8">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        :class="[
+          currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100',
+          'bg-gray-100 text-gray-700'
+        ]"
+      >
+        Anterior
+      </button>
+
+      <span class="mx-4 text-gray-600">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        :class="[
+          currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100',
+          'bg-gray-100 text-gray-700'
+        ]"
+      >
+        Siguiente
+      </button>
     </div>
   </div>
 </template>
