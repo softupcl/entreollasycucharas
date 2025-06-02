@@ -161,6 +161,28 @@ const nextPage = () => {
     <!-- Hero Slider -->
     <HeroSlider />
 
+    <!-- Campo de búsqueda -->
+    <div class="mb-8">
+      <div class="relative">
+        <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 opacity-20"></div>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="🔍 Buscar recetas..."
+          class="w-full px-8 py-4 pr-14 text-sm rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all relative z-10 shadow-lg"
+        />
+        <button
+          class="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          @click="searchQuery = ''"
+          v-if="searchQuery"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- Lista de categorías -->
     <div class="mb-8">
       <div class="flex flex-wrap gap-2">

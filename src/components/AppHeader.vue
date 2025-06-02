@@ -58,14 +58,16 @@ const isAuthenticated = computed(() => user.value !== null)
       <div class="flex justify-between items-center">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2">
-          <span class="text-4xl font-bold tracking-tight">🌐</span>
-          <span class="text-3xl font-bold tracking-tight">Mi Blog</span>
+          <span class="text-4xl font-bold tracking-tight"
+            ><img src="../assets/images/food.svg" alt="Logo" class="w-16 h-16"
+          /></span>
+          <span class="text-3xl font-bold tracking-tight">Entre ollas y cucharas</span>
         </router-link>
 
         <!-- Search -->
-        <div class="hidden md:flex items-center space-x-4">
+        <!-- <div class="hidden md:flex items-center space-x-4">
           <SearchBar @search="handleSearch" />
-        </div>
+        </div> -->
 
         <!-- Mobile menu button -->
         <button @click="menuOpen = !menuOpen" class="md:hidden">
@@ -96,17 +98,26 @@ const isAuthenticated = computed(() => user.value !== null)
           <router-link to="/about" class="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
             <span class="text-lg font-medium">Acerca de</span>
           </router-link>
-          
+
           <template v-if="isAuthenticated">
-            <router-link to="/dashboard" class="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
+            <router-link
+              to="/dashboard"
+              class="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            >
               <span class="text-lg font-medium">Dashboard</span>
             </router-link>
-            <button @click="logout" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
+            <button
+              @click="logout"
+              class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            >
               <span class="text-lg font-medium">Cerrar Sesión</span>
             </button>
           </template>
           <template v-else>
-            <button @click="login" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
+            <button
+              @click="login"
+              class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            >
               <span class="text-lg font-medium">Iniciar Sesión</span>
             </button>
           </template>

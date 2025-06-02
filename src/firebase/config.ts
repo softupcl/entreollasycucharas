@@ -3,14 +3,15 @@ import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDxOWKhn12dJVTzjbk7prfSGjC9g51TdeQ",
-  authDomain: "trivia-app-69733.firebaseapp.com",
-  projectId: "trivia-app-69733",
-  storageBucket: "trivia-app-69733.firebasestorage.app",
-  messagingSenderId: "1045478666058",
-  appId: "1:1045478666058:web:1f3d47b1eb0c01dc365bb3",
-  measurementId: "G-B7GVENP8NQ"
+  apiKey: import.meta.env.VITE_API_KEY_FIREBASE,
+  authDomain: import.meta.env.VITE_DOMINIO_FIREBASE,
+  projectId: import.meta.env.VITE_PROJECT_ID_FIREBASE,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET_FIREBASE,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID_FIREBASE,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID_FIREBASE
 };
+
 
 // Inicializar Firebase
 export const app = initializeApp(firebaseConfig)
