@@ -1,12 +1,12 @@
 import { auth } from './config'
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence
+
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { ref, computed } from 'vue'
