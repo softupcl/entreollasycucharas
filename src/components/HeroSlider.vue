@@ -34,42 +34,46 @@ const modules = [Navigation, Pagination, Autoplay]
 </script>
 
 <template>
-  <div class="relative h-[600px] w-full overflow-hidden mb-10">
-    <swiper
-      :modules="modules"
-      :slides-per-view="1"
-      :space-between="0"
-      :navigation="true"
-      :pagination="{ clickable: true }"
-      :autoplay="{
-        delay: 5000,
-        disableOnInteraction: false,
-      }"
-      class="w-full h-full"
-    >
-      <swiper-slide v-for="(slide, index) in slides" :key="index">
-        <div class="relative w-full">
-          <img :src="slide.image" class="w-full h-full object-cover" :alt="slide.title" />
-          <div class="absolute inset-0 bg-transparent bg-opacity-95 backdrop-blur-sm"></div>
+  <div class="relative h-[200px] w-full overflow-hidden mb-10 md:h-[600px]">
+    <!-- Overlay sutil para mejorar visibilidad en móvil -->
+    <div class="absolute inset-0 bg-gray-50 bg-opacity-10 md:bg-opacity-0"></div>
+    <div class="relative h-[200px] md:h-[600px]">
+      <swiper
+        :modules="modules"
+        :slides-per-view="1"
+        :space-between="0"
+        :navigation="true"
+        :pagination="{ clickable: true }"
+        :autoplay="{
+          delay: 5000,
+          disableOnInteraction: false,
+        }"
+        class="w-full h-full"
+      >
+        <swiper-slide v-for="(slide, index) in slides" :key="index">
+          <div class="relative w-full">
+            <img :src="slide.image" class="w-full h-full object-cover" :alt="slide.title" />
+            <div class="absolute inset-0 bg-transparent bg-opacity-95 backdrop-blur-sm"></div>
 
-          <div class="absolute inset-0 flex items-center justify-center">
-            <div class="text-white text-center px-4">
-              <h1 class="text-5xl md:text-7xl font-bold mb-6">
-                {{ slide.title }}
-              </h1>
-              <p class="text-xl md:text-2xl mb-10">
-                {{ slide.description }}
-              </p>
-              <button
-                class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
-              >
-                Explorar ahora
-              </button>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-gray-50 text-center px-4">
+                <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold mb-6">
+                  {{ slide.title }}
+                </h1>
+                <p class="text-lg md:text-xl lg:text-2xl mb-10">
+                  {{ slide.description }}
+                </p>
+                <button
+                  class="bg-gray-50 text-blue-600 hidden md:block md:items-center md:justify-center px-6 py-3 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
+                >
+                  Ver más
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </swiper-slide>
-    </swiper>
+        </swiper-slide>
+      </swiper>
+    </div>
   </div>
 </template>
 
@@ -83,5 +87,11 @@ const modules = [Navigation, Pagination, Autoplay]
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@media (max-width: 768px) {
+  .swiper-slide {
+    height: 100%;
+  }
 }
 </style>

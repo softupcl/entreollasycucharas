@@ -127,30 +127,55 @@ const isAuthenticated = computed(() => user.value !== null)
       <!-- Mobile menu -->
       <div
         v-if="menuOpen"
-        class="md:hidden absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 p-4"
+        class="md:hidden fixed top-0 left-0 right-0 bottom-0 bg-gradient-to-r from-blue-600 to-purple-600 p-4 z-50"
       >
-        <router-link to="/" class="block mb-2 text-lg hover:text-white/80 transition-colors">
-          Inicio
-        </router-link>
-        <router-link to="/blog" class="block mb-2 text-lg hover:text-white/80 transition-colors">
-          Blog
-        </router-link>
-        <template v-if="isAuthenticated">
-          <button
-            @click="logout"
-            class="block mb-2 w-full text-left text-lg hover:text-white/80 transition-colors"
-          >
-            Cerrar Sesión
-          </button>
-        </template>
-        <template v-else>
-          <button
-            @click="login"
-            class="block mb-2 w-full text-left text-lg hover:text-white/80 transition-colors"
-          >
-            Iniciar Sesión
-          </button>
-        </template>
+        <div class="h-full overflow-y-auto">
+          <div class="px-4 py-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-white">Menú</h2>
+              <button
+                @click="menuOpen = false"
+                class="text-white hover:text-white/80 transition-colors"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="space-y-4">
+              <router-link 
+                to="/" 
+                class="block text-lg font-medium text-white hover:text-white/80 transition-colors"
+                @click="menuOpen = false"
+              >
+                Inicio
+              </router-link>
+              <router-link 
+                to="/about" 
+                class="block text-lg font-medium text-white hover:text-white/80 transition-colors"
+                @click="menuOpen = false"
+              >
+                A cerca de
+              </router-link>
+              <template v-if="isAuthenticated">
+                <button
+                  @click="logout; menuOpen = false"
+                  class="block w-full text-left text-lg font-medium text-white hover:text-white/80 transition-colors"
+                >
+                  Cerrar Sesión
+                </button>
+              </template>
+              <template v-else>
+                <button
+                  @click="login"
+                  class="block w-full text-left text-lg font-medium text-white hover:text-white/80 transition-colors"
+                >
+                  Iniciar Sesión
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
       </div>
     </nav>
   </header>
