@@ -1,10 +1,11 @@
 import { ref, computed } from 'vue'
-import type { User } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
-import { auth, db } from '../firebase/config'
+import { db, auth } from '../firebase/config'
+import { useAuth as useFirebaseAuth } from '../firebase/auth'
+import type { User } from 'firebase/auth'
 
 export function useAuth() {
-  const user = ref<User | null>(null)
+  const { user } = useFirebaseAuth()
   const userRoles = ref<string[]>([])
   const loading = ref(true)
 
@@ -47,7 +48,7 @@ export function useAuth() {
   }
 
   // Inicializar el usuario cuando cambia
-  auth.onAuthStateChanged(async (authUser) => {
+  auth.onAuthStateChanged(async (authUser: User | null) => {
     user.value = authUser
     if (authUser) {
       await fetchUserRoles(authUser.uid)

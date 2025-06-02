@@ -55,9 +55,10 @@
 import { ref, onMounted } from 'vue'
 import { usePosts } from '../firebase/posts'
 import Sidebar from '../components/Sidebar.vue'
+import type { Post } from '@/types'
 
 const { getPosts } = usePosts()
-const posts = ref([])
+const posts = ref<Post[]>([])
 
 const createPost = () => {
   // Implementar la lógica para crear un nuevo post

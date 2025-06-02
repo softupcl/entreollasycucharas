@@ -47,15 +47,23 @@ const fetchCategories = async () => {
           id: doc.id,
           name: doc.data().name as string,
           color: doc.data().color as string,
+          createdAt: doc.data().createdAt as string,
+          updatedAt: doc.data().updatedAt as string,
         }
         return acc
       },
-      {} as Record<string, { id: string; name: string; color: string }>,
+      {} as Record<string, Category>,
     )
 
     // Actualizar las categorías
     categories.value = categoryIds
-      .map((id) => categoriesMap[id] || { id, name: id, color: 'bg-gray-100' })
+      .map((id) => categoriesMap[id] || { 
+        id, 
+        name: id, 
+        color: 'bg-gray-100',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
       .sort((a, b) => a.name.localeCompare(b.name))
   } catch (error) {
     console.error('Error al obtener categorías:', error)
@@ -190,7 +198,7 @@ const nextPage = () => {
           class="px-8 py-2 rounded-full text-sm font-medium transition-colors"
           @click="handleCategoryChange(null)"
           :class="[
-            !selectedCategory ? 'text-white' : 'text-gray-200',
+            selectedCategory === null ? 'text-white' : 'text-gray-200',
             'bg-black',
             !selectedCategory ? 'hover:opacity-500' : 'hover:bg-gray-500',
           ]"

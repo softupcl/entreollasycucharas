@@ -65,6 +65,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Email</label>
               <input
+                v-if="currentUser"
                 type="email"
                 v-model="currentUser.email"
                 :disabled="editingUser"
@@ -74,15 +75,17 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Roles</label>
               <div class="mt-2 space-y-2">
-                <label v-for="role in availableRoles" :key="role" class="flex items-center">
-                  <input
-                    type="checkbox"
-                    :value="role"
-                    v-model="currentUser.roles"
-                    class="form-checkbox h-4 w-4 text-indigo-600"
-                  />
-                  <span class="ml-2 text-sm text-gray-700">{{ role }}</span>
-                </label>
+                <template v-if="currentUser">
+                  <label v-for="role in availableRoles" :key="role" class="flex items-center">
+                    <input
+                      type="checkbox"
+                      :value="role"
+                      v-model="currentUser.roles"
+                      class="form-checkbox h-4 w-4 text-indigo-600"
+                    />
+                    <span class="ml-2 text-sm text-gray-700">{{ role }}</span>
+                  </label>
+                </template>
               </div>
             </div>
           </div>
@@ -116,15 +119,18 @@ import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'fireb
 const users = ref<any[]>([])
 const showModal = ref(false)
 const editingUser = ref(false)
-const currentUser = ref({
-  email: '',
-  roles: []
-})
+interface User {
+  email: string
+  roles: string[]
+  uid: string
+}
+
+const currentUser = ref<User | null>(null)
 const availableRoles = ['admin', 'editor', 'moderator']
 
 // Funciones auxiliares
 const getRoleColor = (role: string) => {
-  const colors = {
+  const colors: Record<string, string> = {
     admin: 'bg-indigo-100 text-indigo-800',
     editor: 'bg-green-100 text-green-800',
     moderator: 'bg-yellow-100 text-yellow-800'
@@ -149,10 +155,13 @@ const fetchUsers = async () => {
 // Crear nuevo usuario
 const saveUser = async () => {
   try {
-    const userDocRef = doc(db, 'users', editingUser.value ? currentUser.value.uid : auth.currentUser?.uid)
+    if (!currentUser.value || !auth.currentUser) return
+    
+    const userDocRef = doc(db, 'users', editingUser.value ? currentUser.value.uid : auth.currentUser.uid)
     await setDoc(userDocRef, {
       email: currentUser.value.email,
-      roles: currentUser.value.roles
+      roles: currentUser.value.roles,
+      uid: editingUser.value ? currentUser.value.uid : auth.currentUser.uid
     })
     closeModal()
     await fetchUsers()
@@ -177,15 +186,16 @@ const deleteUser = async (uid: string) => {
 const openCreateUserModal = () => {
   currentUser.value = {
     email: '',
-    roles: []
+    roles: [],
+    uid: auth.currentUser?.uid || ''
   }
   editingUser.value = false
   showModal.value = true
 }
 
 // Abrir modal de editar usuario
-const openEditUserModal = (user: any) => {
-  currentUser.value = { ...user }
+const openEditUserModal = (user: User) => {
+  currentUser.value = user
   editingUser.value = true
   showModal.value = true
 }

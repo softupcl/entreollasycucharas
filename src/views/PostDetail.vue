@@ -62,7 +62,7 @@ const loadPost = async () => {
     categories.value = categoriesData
 
     if (post.value) {
-      comments.value = post.value.comments || []
+      comments.value = post.value.comments ?? []
     } else {
       error.value = 'No se encontró el post'
     }
@@ -86,7 +86,7 @@ onMounted(async () => {
     post.value = await getPostById(postId)
     if (post.value) {
       console.log('Post cargado exitosamente:', post.value)
-      comments.value = post.value.comments
+      comments.value = post.value.comments ?? []
     } else {
       console.log('No se encontró post con ID:', postId)
       error.value = 'No se encontró el post'

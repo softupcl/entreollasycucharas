@@ -132,10 +132,12 @@ const handleSubmit = async () => {
         comments: formData.value.comments,
       })
     } else {
+      const category = await getCategoryById(formData.value.category)
       await createPost({
         title: formData.value.title,
         content: formData.value.content,
         category: formData.value.category,
+        categoryName: category?.name || formData.value.category,
         imageUrl: formData.value.imageUrl,
         excerpt: formData.value.excerpt,
         author: formData.value.author,
