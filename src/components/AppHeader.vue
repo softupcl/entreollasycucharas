@@ -43,10 +43,9 @@ const login = () => {
 }
 
 // Función para cerrar sesión
-const logout = () => {
-  auth.signOut().then(() => {
-    router.push('/')
-  })
+const logout = async () => {
+  await auth.signOut()
+  router.push('/')
 }
 
 const isAuthenticated = computed(() => !!user.value)
@@ -176,7 +175,7 @@ watch(user, async (newUser) => {
                 class="block text-lg font-medium text-white hover:text-white/80 transition-colors"
                 @click="menuOpen = false"
               >
-                A cerca de
+                Acerca de
               </router-link>
               <template v-if="isAuthenticated">
                 <template v-if="isAdmin">
