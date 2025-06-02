@@ -114,8 +114,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase/config'
+import { register } from '../firebase/auth'
 
 const router = useRouter()
 const email = ref('')
@@ -135,8 +134,8 @@ const handleRegister = async () => {
   }
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
-    // Redirigir al home y actualizar el estado de autenticación
+    await register(email.value, password.value)
+    // Redirigir al home
     router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Error al crear la cuenta'

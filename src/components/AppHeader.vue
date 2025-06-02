@@ -2,7 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
-import SearchBar from './SearchBar.vue'
+import { getUserDocument } from '../firebase/users'
 import { auth } from '../firebase/config'
 import type { User } from 'firebase/auth'
 
@@ -49,7 +49,21 @@ const logout = () => {
   })
 }
 
-const isAuthenticated = computed(() => user.value !== null)
+const isAuthenticated = computed(() => !!user.value)
+
+// Función para verificar si el usuario es admin
+const isAdmin = ref(false)
+
+// Verificar si el usuario es admin cuando cambia el estado de autenticación
+watch(user, async (newUser) => {
+  if (newUser) {
+    const doc = await getUserDocument(newUser.uid)
+    isAdmin.value = doc?.roles.includes('admin') || false
+  } else {
+    isAdmin.value = false
+  }
+}, { immediate: true })
+
 </script>
 
 <template>
@@ -100,12 +114,14 @@ const isAuthenticated = computed(() => user.value !== null)
           </router-link>
 
           <template v-if="isAuthenticated">
-            <router-link
-              to="/dashboard"
-              class="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-            >
-              <span class="text-lg font-medium">Dashboard</span>
-            </router-link>
+            <template v-if="isAdmin">
+              <router-link
+                to="/dashboard"
+                class="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <span class="text-lg font-medium">Dashboard</span>
+              </router-link>
+            </template>
             <button
               @click="logout"
               class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
@@ -138,28 +154,42 @@ const isAuthenticated = computed(() => user.value !== null)
                 class="text-white hover:text-white/80 transition-colors"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
             <div class="space-y-4">
-              <router-link 
-                to="/" 
+              <router-link
+                to="/"
                 class="block text-lg font-medium text-white hover:text-white/80 transition-colors"
                 @click="menuOpen = false"
               >
                 Inicio
               </router-link>
-              <router-link 
-                to="/about" 
+              <router-link
+                to="/about"
                 class="block text-lg font-medium text-white hover:text-white/80 transition-colors"
                 @click="menuOpen = false"
               >
                 A cerca de
               </router-link>
               <template v-if="isAuthenticated">
+                <template v-if="isAdmin">
+                  <router-link
+                    to="/dashboard"
+                    class="block text-lg font-medium text-white hover:text-white/80 transition-colors"
+                    @click="menuOpen = false"
+                  >
+                    Dashboard
+                  </router-link>
+                </template>
                 <button
-                  @click="logout; menuOpen = false"
+                  @click="logout(); menuOpen = false"
                   class="block w-full text-left text-lg font-medium text-white hover:text-white/80 transition-colors"
                 >
                   Cerrar Sesión

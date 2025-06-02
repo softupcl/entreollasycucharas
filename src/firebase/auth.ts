@@ -6,8 +6,9 @@ import {
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
-
 } from 'firebase/auth'
+
+import { createUserDocument } from './users'
 import type { User } from 'firebase/auth'
 import { ref, computed } from 'vue'
 
@@ -27,7 +28,12 @@ export const login = async (email: string, password: string) => {
 export const register = async (email: string, password: string) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    return userCredential.user
+    const user = userCredential.user
+    
+    // Crear documento de usuario en Firestore
+    await createUserDocument(user)
+    
+    return user
   } catch (error) {
     throw error
   }
